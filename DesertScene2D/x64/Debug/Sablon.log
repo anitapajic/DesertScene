@@ -1,15 +1,14 @@
 ﻿  main.cpp
-C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\Vezbe5\Teksture\main.cpp(125,21): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\Vezbe5\Teksture\main.cpp(118,16): warning C4101: 'height': unreferenced local variable
-C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\Vezbe5\Teksture\main.cpp(118,9): warning C4101: 'width': unreferenced local variable
-C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\Vezbe5\Teksture\main.cpp(140,21): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\Vezbe5\Teksture\main.cpp(159,21): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\Vezbe5\Teksture\main.cpp(374,32): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\Vezbe5\Teksture\main.cpp(475,32): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\Vezbe5\Teksture\main.cpp(483,24): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\Vezbe5\Teksture\main.cpp(484,24): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\Vezbe5\Teksture\main.cpp(562,63): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\Vezbe5\Teksture\main.cpp(569,63): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\Vezbe5\Teksture\main.cpp(576,63): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-glew32sd.lib(glew.obj) : warning LNK4099: PDB '' was not found with 'glew32sd.lib(glew.obj)' or at ''; linking object as if no debug info
-  Sablon.vcxproj -> C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\Vezbe5\Teksture\x64\Debug\Sablon.exe
+C:\Users\anita\Desktop\RG-projekat\DesertScene2D\main.cpp(117,21): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\anita\Desktop\RG-projekat\DesertScene2D\main.cpp(110,16): warning C4101: 'height': unreferenced local variable
+C:\Users\anita\Desktop\RG-projekat\DesertScene2D\main.cpp(110,9): warning C4101: 'width': unreferenced local variable
+C:\Users\anita\Desktop\RG-projekat\DesertScene2D\main.cpp(131,21): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\anita\Desktop\RG-projekat\DesertScene2D\main.cpp(148,21): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\anita\Desktop\RG-projekat\DesertScene2D\main.cpp(365,32): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\anita\Desktop\RG-projekat\DesertScene2D\main.cpp(466,32): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\anita\Desktop\RG-projekat\DesertScene2D\main.cpp(474,24): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\anita\Desktop\RG-projekat\DesertScene2D\main.cpp(475,24): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\anita\Desktop\RG-projekat\DesertScene2D\main.cpp(557,63): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+C:\Users\anita\Desktop\RG-projekat\DesertScene2D\main.cpp(563,63): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+C:\Users\anita\Desktop\RG-projekat\DesertScene2D\main.cpp(569,63): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+  Sablon.vcxproj -> C:\Users\anita\Desktop\RG-projekat\DesertScene2D\x64\Debug\Sablon.exe

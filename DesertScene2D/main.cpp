@@ -1,15 +1,9 @@
-
 #define _CRT_SECURE_NO_WARNINGS
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
-
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
-//stb_image.h je header-only biblioteka za ucitavanje tekstura.
-//Potrebno je definisati STB_IMAGE_IMPLEMENTATION prije njenog ukljucivanja
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include <vector>
@@ -20,44 +14,7 @@
 unsigned int compileShader(GLenum type, const char* source);
 unsigned int createShader(const char* vsSource, const char* fsSource);
 static unsigned loadImageToTexture(const char* filePath); //Ucitavanje teksture, izdvojeno u funkciju
-
-void getPyramidVertices(float x, float y, float size, const std::vector<float>& baseColor, std::vector<float>& vertices, float colorChangeProgress) {
-    float offset = size * 0.1f;
-    float peakX = x;
-    float peakY = y + size;
-
-    // Calculate darker color
-    std::vector<float> darkerColor = { baseColor[0] * 0.8f, baseColor[1] * 0.8f, baseColor[2] * 0.8f };
-
-    // Function to interpolate between base color and red based on progress
-    auto interpolateColor = [&](const std::vector<float>& color, float vertexX) -> std::vector<float> {
-        float progressThreshold = (vertexX - (x - size / 2)) / size;
-        if (colorChangeProgress >= progressThreshold) {
-            float changeAmount = std::min(colorChangeProgress - progressThreshold, 1.0f);
-            return { color[0] * (1 - changeAmount) + 1.0f * changeAmount, // Red component
-                     color[1] * (1 - changeAmount),                       // Green component
-                     color[2] * (1 - changeAmount) };                     // Blue component
-        }
-        return color;
-        };
-
-    // Left face
-    std::vector<float> leftColor = interpolateColor(baseColor, x - size / 2);
-    vertices.insert(vertices.end(), {
-        x - size / 2, y, leftColor[0], leftColor[1], leftColor[2],
-        peakX, peakY, leftColor[0], leftColor[1], leftColor[2],
-        x, y, leftColor[0], leftColor[1], leftColor[2]
-        });
-
-    // Right face
-    std::vector<float> rightColor = interpolateColor(darkerColor, x);
-    vertices.insert(vertices.end(), {
-        x + size / 2 - offset, y + offset, rightColor[0], rightColor[1], rightColor[2],
-        peakX, peakY, rightColor[0], rightColor[1], rightColor[2],
-        x, y, rightColor[0], rightColor[1], rightColor[2]
-        });
-}
-
+// FUNKCIJE ZA KREIRANJE VAO I VBO ==================================================================================
 void createPVAOandPVBO(unsigned int& VAO, unsigned int& VBO, const float* vertices, size_t size) {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -66,11 +23,11 @@ void createPVAOandPVBO(unsigned int& VAO, unsigned int& VBO, const float* vertic
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
 
-    // Position attribute
+    // Pozicija
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    // Color attribute
+    // Boja
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
@@ -85,16 +42,16 @@ void createTVAOandTVBO(unsigned int& VAO, unsigned int& VBO, const float* vertic
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
 
-    // Position attribute
+    // Pozicija
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    // Texture coordinate attribute
+    // Kordinate teksture
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0); // Unbind VBO
-    glBindVertexArray(0); // Unbind VAO
+    glBindBuffer(GL_ARRAY_BUFFER, 0); 
+    glBindVertexArray(0); 
 }
 void createVAOandVBO(unsigned int& VAO, unsigned int& VBO, const float* vertices, size_t size) {
     glGenVertexArrays(1, &VAO);
@@ -111,48 +68,73 @@ void createVAOandVBO(unsigned int& VAO, unsigned int& VBO, const float* vertices
     glBindVertexArray(0);
 }
 
-const int numVertices = 40; // Number of vertices for the circle
+// POMOCNE FUNKCIJE ZA KREIRANJE KOORDINATA ===============================================================================
+void getPyramidVertices(float x, float y, float size, const std::vector<float>& baseColor, std::vector<float>& vertices, float colorChangeProgress) {
+    float offset = size * 0.1f;
+    float peakX = x;
+    float peakY = y + size;
 
-void generateCircleVertices(float* vertices, float radius, float offsetX, float offsetY) {
+    // Izracunavanje tamnije boje za desnu stranu piramide
+    std::vector<float> darkerColor = { baseColor[0] * 0.8f, baseColor[1] * 0.8f, baseColor[2] * 0.8f };
+
+    // Funkcija za interpolaciju menjanje boje postepeno u crvenu
+    auto interpolateColor = [&](const std::vector<float>& color, float vertexX) -> std::vector<float> {
+        float progressThreshold = (vertexX - (x - size / 2)) / size;
+        if (colorChangeProgress >= progressThreshold) {
+            float changeAmount = std::min(colorChangeProgress - progressThreshold, 1.0f);
+            return { color[0] * (1 - changeAmount) + 1.0f * changeAmount, // R
+                     color[1] * (1 - changeAmount),                       // G
+                     color[2] * (1 - changeAmount) };                     // B
+        }
+        return color;
+        };
+
+    // Leva strana
+    std::vector<float> leftColor = interpolateColor(baseColor, x - size / 2);
+    vertices.insert(vertices.end(), {
+        x - size / 2, y, leftColor[0], leftColor[1], leftColor[2],
+        peakX, peakY, leftColor[0], leftColor[1], leftColor[2],
+        x, y, leftColor[0], leftColor[1], leftColor[2]
+        });
+
+    // Desna strana
+    std::vector<float> rightColor = interpolateColor(darkerColor, x);
+    vertices.insert(vertices.end(), {
+        x + size / 2 - offset, y + offset, rightColor[0], rightColor[1], rightColor[2],
+        peakX, peakY, rightColor[0], rightColor[1], rightColor[2],
+        x, y, rightColor[0], rightColor[1], rightColor[2]
+        });
+}
+//Broj kordinata za krugove
+const int numVertices = 40; 
+void generateCircleVertices(float* vertices, float radius, float offsetX, float offsetY, float aspectRatio) {
     int vertexIndex = 0;
     int width, height;
  
-    // Center vertex
+    // Centar
     vertices[vertexIndex++] = offsetX; // X
     vertices[vertexIndex++] = offsetY; // Y
 
     for (int i = 0; i <= numVertices; ++i) {
         float angle = 2.0f * M_PI * i / numVertices;
-        vertices[vertexIndex++] = radius * cos(angle) + offsetX;  // X
+        vertices[vertexIndex++] = radius * cos(angle) * aspectRatio + offsetX;  // X
         vertices[vertexIndex++] = radius * sin(angle) + offsetY; // Y
     }
 }
-
 void generateHalfCircleVertices(float* vertices, float radius, float offsetX, float offsetY) {
     int vertexIndex = 0;
 
-    // Center vertex
+    // Centar
     vertices[vertexIndex++] = offsetX; // X
     vertices[vertexIndex++] = offsetY; // Y
 
-    // Half-circle vertices
+    // Koordinate polukruga
     for (int i = 0; i <= numVertices; ++i) {
         float angle = (3 * M_PI / 2) - (M_PI * i / numVertices);
-        vertices[vertexIndex++] = radius * cos(angle) + offsetX; // X, adjusted for aspect ratio
+        vertices[vertexIndex++] = radius * cos(angle) + offsetX; // X
         vertices[vertexIndex++] = radius * sin(angle) + offsetY; // Y
     }
 }
-
-bool isNightTime(float sunPosY, float moonPosY) {
-    if (sunPosY > 0) {
-        return false; // Dan
-    }
-    else if (moonPosY > 0) {
-        return true; // Noc
-    }
-    return false; // Podrazumevano je dan
-}
-
 void generateEllipseVertices(float* vertices, float centerX, float centerY, float radiusX, float radiusY, int numVertices) {
     int vertexIndex = 0;
     for (int i = 0; i < numVertices; ++i) {
@@ -161,127 +143,132 @@ void generateEllipseVertices(float* vertices, float centerX, float centerY, floa
         vertices[vertexIndex++] = centerY + radiusY * sin(angle); // Y
     }
 }
+// Funkcija za izracunavanje interpolacijskog faktora za promenu boja neba i zvezdica
+float getInterpolationFactor(float sunPosY, float moonPosY) {
+    return (sunPosY + 1.0f) / 2.0f; 
+}
 
 int main(void)
 {
-    // Initialize GLFW
+    // Inicijalizacija GLFW-a
     if (!glfwInit())
         return -1;
 
-    // Set window hints here (if necessary, for specific OpenGL version/context)
-
-    // Get the primary monitor and video mode
+    // Primarni monitor i video mode
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
     const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 
-    // Create a fullscreen window
+    // Kreiranje fullscreen prozora
     GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "Desert Scene", monitor, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
     }
 
-    // Make the window's context current
+    // Kreiranje konteksta
     glfwMakeContextCurrent(window);
 
-    // Initialize GLEW
+    // Inicijalizacija GLEW-a
     if (glewInit() != GLEW_OK) {
         std::cerr << "Failed to initialize GLEW" << std::endl;
         return -1;
     }
 
-    // Set viewport to the full window size
+    // Setovanje viewport-a na fullscreen
     glViewport(0, 0, mode->width, mode->height);
 
+    // KOORDINATE =================================================================================
+    float aspectRatio = (float)mode->height / (float)mode->width;
 
     float circleVertices[(numVertices+2) * 2];
-    generateCircleVertices(circleVertices, 0.1f, 0.0f, 0.0f); // Za Sunce
+    generateCircleVertices(circleVertices, 0.2f, 0.0f, 0.0f, aspectRatio); // Za Sunce
 
-    float halfCircleVertices[(numVertices + 2) * 2]; // Array for half-circle vertices
+    float halfCircleVertices[(numVertices + 2) * 2]; 
     generateHalfCircleVertices(halfCircleVertices, 0.1f, 0.0f, 0.0f); // Za polumesec
 
-
     float skyVertices[] = {
-    -1.0f, 1.0f,  // Top Left
-     1.0f, 1.0f,  // Top Right
-     1.0f, 0.0f,  // Bottom Right
-    -1.0f, 0.0f   // Bottom Left
+    -1.0f, 1.0f,  // Leva gornja
+     1.0f, 1.0f,  // Desna gornja
+     1.0f, 0.0f,  // Desna donja
+    -1.0f, 0.0f   // Leva donja
     };
   
+    // Oaza (voda)
     const int numWaterVertices = 360; 
-    float waterVertices[numWaterVertices * 2]; // Svaki vertex ima X i Y koordinatu
-
-    // Poziv funkcije za generisanje elipse
+    float waterVertices[numWaterVertices * 2]; 
     generateEllipseVertices(waterVertices, -0.5f, -0.3f, 0.3f, 0.2f, numWaterVertices);
 
-    // Fish position and velocity
-    float fishPositionX = -0.5f;  // More centered initial position
-    float fishWidth = 0.2f;       // Width of the fish
-    float fishHeight = 0.2f;      // Height of the fish
-    float fishCenterY = -0.2f;    // Vertical center of the fish
-    // Fish vertices
+    // Pozicija ribice
+    float fishPositionX = -0.5f;  // Inicijalna pozicija
+    float fishWidth = 0.2f;       // Sirina ribice
+    float fishHeight = 0.2f;      // Visina ribice
+    float fishCenterY = -0.2f;    // Centar ribice (vertikalni)
+    // Koordinate ribice
     float fishVertices[] = {
-        fishPositionX - fishWidth, fishCenterY - fishHeight / 2,  // Left corner
-        fishPositionX, fishCenterY,                               // Top center
-        fishPositionX + fishWidth, fishCenterY - fishHeight / 2   // Right corner
+        fishPositionX - fishWidth, fishCenterY - fishHeight / 2,  // Levo teme
+        fishPositionX, fishCenterY,                               // Gornje teme
+        fishPositionX + fishWidth, fishCenterY - fishHeight / 2   // Desno teme
     };
 
     float grassVertices[] = {
-        // Positions    // Texture Coords (s, t)
-        -0.8f, -0.7f, 0.0f, 0.0f, // Bottom Left
-        -0.2f, -0.7f, 1.0f, 0.0f, // Bottom Right
-        -0.2f, 0.06f,    1.0f, 1.0f, // Top Right
-        -0.8f, 0.06f,    0.0f, 1.0f  // Top Left
+        // Koordinate    // Deo slike (s, t)
+        -0.8f, -0.7f, 0.0f, 0.0f, // Leva donja
+        -0.2f, -0.7f, 1.0f, 0.0f, // Desna donja
+        -0.2f, 0.06f,    1.0f, 1.0f, // Desna gornja
+        -0.8f, 0.06f,    0.0f, 1.0f  // Leva gornja
     };
 
     float indexVertices[] = {
-        // Positions    // Texture Coords (s, t)
-        0.4f, -1.0f,   0.0f, 0.0f, // Bottom Left
-        1.0f, -1.0f,    1.0f, 0.0f, // Bottom Right
-        1.0f, -0.8f,    1.0f, 1.0f, // Top Right
-        0.4f, -0.8f,   0.0f, 1.0f  // Top Left
+        // Koordinate    // Deo slike (s, t)
+        0.4f, -1.0f,   0.0f, 0.0f, // Leva donja
+        1.0f, -1.0f,    1.0f, 0.0f, // Desna donja
+        1.0f, -0.8f,    1.0f, 1.0f, // Desna gornja
+        0.4f, -0.8f,   0.0f, 1.0f  // Leva gornja
     };
     float desertVertices[] = {
-    -1.0f,  0.0f,  // Top Left
-     1.0f,  0.0f,  // Top Right
-     1.0f, -1.0f,  // Bottom Right
-    -1.0f, -1.0f   // Bottom Left
+    -1.0f,  0.0f,  // Leva gornja
+     1.0f,  0.0f,  // Desna gornja
+     1.0f, -1.0f,  // Desna donja
+    -1.0f, -1.0f   // Leva donja
     };
 
- 
-    float largestPyramidRed = 0.92f;
-    float largestPyramidGreen = 0.80f;
-    float largestPyramidBlue = 0.65f;
+    // Zvezdice
+    const int numStars = 100;
+    float starPositions[numStars * 2];
+    srand(static_cast<unsigned int>(time(nullptr)));
 
-    unsigned int unifiedShader = createShader("basic.vert", "basic.frag");
+    for (int i = 0; i < numStars * 2; i += 2) {
+        starPositions[i] = static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f;   // X koordinata
+        starPositions[i + 1] = static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f; // Y koordinata
+    }
 
-    // Function to create VAO and VBO
+    // Inicijalizovanje VAO i VBO =============================================================================
 
-    // Sun
+    // Sunce
     unsigned int circleVAO, circleVBO;
     createVAOandVBO(circleVAO, circleVBO, circleVertices, sizeof(circleVertices));
 
-    // Half Moon
+    // Polumesec
     unsigned int moonVAO, moonVBO;
     createVAOandVBO(moonVAO, moonVBO, halfCircleVertices, sizeof(halfCircleVertices));
 
-    // Sky
+    // Nebo
     unsigned int skyVAO, skyVBO;
     createVAOandVBO(skyVAO, skyVBO, skyVertices, sizeof(skyVertices));
 
-    // Water
+    // Voda
     unsigned int waterVAO, waterVBO;
     createVAOandVBO(waterVAO, waterVBO, waterVertices, sizeof(waterVertices));
 
-    // Fish
+    // Ribica
     unsigned int fishVAO, fishVBO;
     createVAOandVBO(fishVAO, fishVBO, fishVertices, sizeof(fishVertices));
 
-    // Desert
+    // Pustinja
     unsigned int desertVAO, desertVBO;
     createVAOandVBO(desertVAO, desertVBO, desertVertices, sizeof(desertVertices));
 
-    // Grass
+    // Trava
     unsigned int grassVAO, grassVBO;
     createTVAOandTVBO(grassVAO, grassVBO, grassVertices, sizeof(grassVertices));
 
@@ -289,7 +276,7 @@ int main(void)
     unsigned int indexVAO, indexVBO;
     createTVAOandTVBO(indexVAO, indexVBO, indexVertices, sizeof(indexVertices));
 
-    // Pyramids
+    // Piramide
     std::vector<float> pyramidVertices1, pyramidVertices2, pyramidVertices3;
     std::vector<float> baseColor = { 0.92f, 0.80f, 0.65f }; 
 
@@ -306,43 +293,56 @@ int main(void)
     unsigned int pyramidVAO3, pyramidVBO3;
     createPVAOandPVBO(pyramidVAO3, pyramidVBO3, pyramidVertices3.data(), pyramidVertices3.size() * sizeof(float));
 
+    // Zvezdice
+    unsigned int starVAO, starVBO;
+    createVAOandVBO(starVAO, starVBO, starPositions, sizeof(starPositions));
+
 
     //Tekstura
-    // Activate the first texture unit and bind the grass texture
+    // Aktiviranje prve teksture ( trava)
     glActiveTexture(GL_TEXTURE0);
     unsigned grassTexture = loadImageToTexture("res/grass2.png");
     glBindTexture(GL_TEXTURE_2D, grassTexture);
 
-    // Set texture parameters for the grass texture
+    // Setovanje parametara
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glGenerateMipmap(GL_TEXTURE_2D);
 
-    // Activate the second texture unit and bind the index texture
+    // Aktiviranje druge teksture (index)
     glActiveTexture(GL_TEXTURE1);
     unsigned indexTexture = loadImageToTexture("res/index.jpg");
     glBindTexture(GL_TEXTURE_2D, indexTexture);
 
-    // Set texture parameters for the index texture
+    // Setovanje parametara
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glGenerateMipmap(GL_TEXTURE_2D);
 
-    // Unbind the texture
+    // Unbindovanje tekstura
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    // POMOCNE PROMENLJIVE =====================================================================
+
+    // Inicijalne boje najvece piramide
+    float largestPyramidRed = 0.92f;
+    float largestPyramidGreen = 0.80f;
+    float largestPyramidBlue = 0.65f;
+
+    // Kreiranje zajednickog shader-a
+    unsigned int unifiedShader = createShader("basic.vert", "basic.frag");
 
     bool showGrass = true;
 
     bool changingColor = false;
-    float colorChangeProgress = 0.0f; // Ranges from 0.0 (no change) to 1.0 (fully red)
-    float colorChangeStep = 0.009f; // Smaller value for slower color change
+    float colorChangeProgress = 0.0f; // Od 0.0 (bez promene) do 1.0 (skroz crven)
+    float colorChangeStep = 0.009f; // Vrednost promene ( sto manje = manja promena)
 
-    float fishVelocityX = 0.001f;
+    float fishVelocityX = 0.001f;  // brzina ribice
 
     const float sunRadius = 0.8f;
     const float moonRadius = 0.8f;
@@ -356,79 +356,64 @@ int main(void)
     float lastFrameTime = 0.0f;
     float deltaTime = 0.0f;
 
-
-
-    //const int numStars = 100;
-
-    //float starPositions[numStars * 2]; 
-
-    //srand(static_cast<unsigned int>(time(nullptr)));
-
-    //for (int i = 0; i < numStars * 2; i += 2) {
-    //    starPositions[i] = static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f;   // X koordinata
-    //    starPositions[i + 1] = static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f; // Y koordinata
-    //}
-
     while (!glfwWindowShouldClose(window))
     {
         float currentFrameTime = glfwGetTime();
         deltaTime = currentFrameTime - lastFrameTime;
         lastFrameTime = currentFrameTime;
 
-        // Update fish position
+        // Update brzine ribice
         fishPositionX += fishVelocityX;
 
-        // Adjust for fish width
+        // Sirina prostora gde moze da se krece
         float leftBoundary = -0.8f + fishWidth;
         float rightBoundary = -0.2f - fishWidth;
 
-        // Check for boundary collision
+        // Provera da li je u dozvoljenom prostoru
         if (fishPositionX > rightBoundary || fishPositionX < leftBoundary) {
-            fishVelocityX = -fishVelocityX; // Reverse direction
-            fishPositionX += fishVelocityX;  // Immediate position correction
+            fishVelocityX = -fishVelocityX; // Promena smera
+            fishPositionX += fishVelocityX;  // Korekcija pozicije
         }
 
-        // Update whether the fish is facing right or left
+        // Promena smera (izgled)
         bool facingRight = fishVelocityX > 0;
 
-        // Update vertices
-        fishVertices[0] = facingRight ? fishPositionX - fishWidth : fishPositionX; // Left corner X
-        fishVertices[1] = fishCenterY - fishHeight / 2; // Left corner Y
+        // Update koordinata
+        fishVertices[0] = facingRight ? fishPositionX - fishWidth : fishPositionX; // Levo teme X
+        fishVertices[1] = fishCenterY - fishHeight / 2; // Levo teme Y
 
-        fishVertices[2] = fishPositionX; // Top center X
-        fishVertices[3] = fishCenterY; // Top center Y
+        fishVertices[2] = fishPositionX; // Top teme X
+        fishVertices[3] = fishCenterY; // Top teme Y
 
-        fishVertices[4] = facingRight ? fishPositionX : fishPositionX + fishWidth; // Right corner X
-        fishVertices[5] = fishCenterY - fishHeight / 2; // Right corner Y
+        fishVertices[4] = facingRight ? fishPositionX : fishPositionX + fishWidth; // Desno teme X
+        fishVertices[5] = fishCenterY - fishHeight / 2; // Desno teme Y
 
-        // Update fish VBO with new vertices
+        // Update VBO ribice i koordinata
         glBindBuffer(GL_ARRAY_BUFFER, fishVBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(fishVertices), fishVertices);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-
+        // Omogucavanje alpha blenda
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         
       
-        // Check if escape key was pressed
+        // Reagovanje na tastere =================================================================
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, GLFW_TRUE);
-
         if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
             showGrass = false;
         }
-        // Show grass on key press '2'
         if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
             showGrass = true;
         }
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
             changingColor = true;
-            colorChangeProgress = std::max(0.0f, colorChangeProgress - colorChangeStep); // Decrease color change, clamp to 0.0
+            colorChangeProgress = std::max(0.0f, colorChangeProgress - colorChangeStep); 
         }
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
             changingColor = true;
-            colorChangeProgress = std::min(1.0f, colorChangeProgress + colorChangeStep); // Increase color change, clamp to 1.0
+            colorChangeProgress = std::min(1.0f, colorChangeProgress + colorChangeStep); 
         }
         bool currentPState = glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS;
         bool currentRState = glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS;
@@ -437,21 +422,19 @@ int main(void)
         if (currentPState && !lastPState) {
             isDayPaused = !isDayPaused;
         }
-
         // Provera za R taster - samo reaguje na promenu stanja
         if (currentRState && !lastRState) {
             isDayPaused = false;
             currentTime = 0.0f; // Resetuje vreme na jutro
         }
-
-      
         lastPState = currentPState;
         lastRState = currentRState;
 
-        // Clear the screen
+        // Clear-uj ekran
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
    
+        // Promenljive iz shader-a
         GLuint colorLoc = glGetUniformLocation(unifiedShader, "uColor");
         GLuint useVertexColorLoc = glGetUniformLocation(unifiedShader, "useVertexColor");
         GLuint useTextureLoc = glGetUniformLocation(unifiedShader, "useTexture");
@@ -459,9 +442,9 @@ int main(void)
         GLuint uMoonPosLoc = glGetUniformLocation(unifiedShader, "uMoonPos");
         GLuint uIsSunLoc = glGetUniformLocation(unifiedShader, "uIsSun");
         GLuint uUseSunMoonPositioningLoc = glGetUniformLocation(unifiedShader, "uUseSunMoonPositioning");
-        GLuint isNightLoc = glGetUniformLocation(unifiedShader, "isNight");
-        GLuint nightColorLoc = glGetUniformLocation(unifiedShader, "nightColor");
-
+        GLuint uRenderStarsLoc = glGetUniformLocation(unifiedShader, "uRenderStars");
+        GLuint uStarSizeLoc = glGetUniformLocation(unifiedShader, "uStarSize");
+        GLuint uStarIntensityLoc = glGetUniformLocation(unifiedShader, "uStarIntensity");
 
         glUseProgram(unifiedShader);
         
@@ -471,44 +454,48 @@ int main(void)
             currentTime += deltaTime; 
         }
 
-        // Conversion from degrees to radians
+        // Konverzija stepena u radijane
         float degreesToRadians = M_PI / 180.0f;
-        float moonAdjustment = 45.0f * degreesToRadians; // 20 degrees in radians
+        float moonAdjustment = 45.0f * degreesToRadians; 
 
 
         float sunPosX = sunRadius * cos(currentTime * sunRotationSpeed);
         float sunPosY = sunRadius * sin(currentTime * sunRotationSpeed);
 
-        // Adjusted moon position
+     
         float moonPosX = moonRadius * cos((currentTime + M_PI + moonAdjustment) * moonRotationSpeed);
         float moonPosY = moonRadius * sin((currentTime + M_PI + moonAdjustment) * moonRotationSpeed);
-     
-        bool isNight = isNightTime(sunPosY, moonPosY);
-        glUniform1i(isNightLoc, isNight);
+        
+        // Crtanje neba
+        GLfloat lightBlueColor[4] = { 0.53f, 0.81f, 0.98f, 1.0f };
+        GLfloat darkBlueColor[4] = { 0.0f, 0.0f, 0.2f, 1.0f }; 
 
-        // Draw sky
+        float interpolationFactor = (sunPosY + 1.0f) / 2.0f; 
+
+        GLfloat skyColor[4];
+        for (int i = 0; i < 4; i++) {
+            skyColor[i] = lightBlueColor[i] * interpolationFactor + darkBlueColor[i] * (1 - interpolationFactor);
+        }
+
+        glUniform4fv(colorLoc, 1, skyColor);
+        glUseProgram(unifiedShader);
         glUniform1i(useTextureLoc, GL_FALSE);
         glUniform1i(useVertexColorLoc, GL_FALSE);
-        glUniform1i(isNightLoc, isNight);
-        glUniform4f(isNight ? nightColorLoc : colorLoc, 0.53f, 0.81f, 0.98f, 1.0f);
         glBindVertexArray(skyVAO);
         glDrawArrays(GL_QUADS, 0, 4);
+       
+        float starIntensity = 1.0f - interpolationFactor; // Maksimalan kada je interpolationFactor 0 
 
-        /*if (isNight) {
-            glPointSize(2.0f); 
-            glColor3f(1.0f, 1.0f, 1.0f); 
+        glUniform1i(uRenderStarsLoc, GL_TRUE);
+        glEnable(GL_PROGRAM_POINT_SIZE);
+        glUniform1f(uStarSizeLoc, 3.0f); 
+        glUniform1f(uStarIntensityLoc, starIntensity);
+        glBindVertexArray(starVAO);
+        glDrawArrays(GL_POINTS, 0, numStars);
 
-            glBegin(GL_POINTS);
-            for (int i = 0; i < numStars * 2; i += 2) {
-                glVertex2f(starPositions[i], starPositions[i + 1]);
-            }
-            glEnd();
-        }*/
+        glUniform1i(uRenderStarsLoc, GL_FALSE);
 
-        glUniform1i(isNightLoc, GL_FALSE);
-    
-
-        // Draw sun
+        // Crtanje sunca
         glUniform1i(uUseSunMoonPositioningLoc, GL_TRUE);
         glUniform4f(colorLoc, 1.0f, 1.0f, 0.0f, 1.0f);
         glUniform1i(uIsSunLoc, GL_TRUE);
@@ -517,7 +504,7 @@ int main(void)
         glDrawArrays(GL_TRIANGLE_FAN, 0, numVertices + 2);
 
 
-        // Draw Moon
+        // Crtanje polumeseca
         glUniform1i(uUseSunMoonPositioningLoc, GL_TRUE);
         glUniform4f(colorLoc, 1.0f, 1.0f, 1.0f, 1.0f);
         glUniform1i(uIsSunLoc, GL_FALSE);
@@ -528,14 +515,14 @@ int main(void)
 
         glUniform1i(uUseSunMoonPositioningLoc, GL_FALSE);
 
-        // Draw Desert
+        // Crtanje pustinje
         glUniform1i(useTextureLoc, GL_FALSE);
         glUniform1i(useVertexColorLoc, GL_FALSE);
         glUniform4f(colorLoc, 0.76f, 0.70f, 0.50f, 1.0f);
         glBindVertexArray(desertVAO);
         glDrawArrays(GL_QUADS, 0, 4);
 
-        // Draw Water
+        // Crtanje vode
         glUniform1i(useTextureLoc, GL_FALSE);
         glUniform1i(useVertexColorLoc, GL_FALSE);
         glUniform4f(colorLoc, 0.0f, 0.5f, 1.0f, 0.5f);
@@ -545,76 +532,67 @@ int main(void)
         glDrawArrays(GL_TRIANGLE_FAN, 0, numWaterVertices);
 
 
-        // Update the color of the largest pyramid if needed
+        // Promena boje najvece piramide ukoliko su tasteri pritisnuti
         if (changingColor) {
             std::vector<float> newPyramidVertices1;
             getPyramidVertices(0.5f, -0.2f, 0.5f, baseColor, newPyramidVertices1, colorChangeProgress);
             glBindBuffer(GL_ARRAY_BUFFER, pyramidVBO1);
             glBufferSubData(GL_ARRAY_BUFFER, 0, newPyramidVertices1.size() * sizeof(float), newPyramidVertices1.data());
             glBindBuffer(GL_ARRAY_BUFFER, 0);
-            changingColor = false; // Reset the flag after updating the vertices
+            changingColor = false; 
         }
 
-        // Draw Pyramid 1
+        // Crtanje piramide 1
         glUniform1i(useTextureLoc, GL_FALSE);
-        glUniform1i(useVertexColorLoc, GL_TRUE); // Use vertex color
+        glUniform1i(useVertexColorLoc, GL_TRUE);
         glBindVertexArray(pyramidVAO1);
         glDrawArrays(GL_TRIANGLES, 0, pyramidVertices1.size() / 5);
 
-        // Draw Pyramid 2
-      
+        // Crtanje piramide 2 
         glUniform1i(useTextureLoc, GL_FALSE);
         glUniform1i(useVertexColorLoc, GL_TRUE); // Use vertex color
         glBindVertexArray(pyramidVAO2);
         glDrawArrays(GL_TRIANGLES, 0, pyramidVertices2.size() / 5);
 
-        // Draw Pyramid 3
-        
+        // Crtanje piramide 3   
         glUniform1i(useTextureLoc, GL_FALSE);
-        glUniform1i(useVertexColorLoc, GL_TRUE); // Use vertex color
+        glUniform1i(useVertexColorLoc, GL_TRUE); 
         glBindVertexArray(pyramidVAO3);
         glDrawArrays(GL_TRIANGLES, 0, pyramidVertices3.size() / 5);
 
-         // Draw Grass
-         // // Bind grass texture
-
+         // // Bind-ovanje teksture trave
         glBindTexture(GL_TEXTURE_2D, grassTexture);
-
-        // Draw grass strip
-        
+        // Crtanje trave 
         if (showGrass) {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, grassTexture);
             glUniform1i(useTextureLoc, GL_TRUE);
-            glUniform1i(useVertexColorLoc, GL_TRUE); // Use vertex color
+            glUniform1i(useVertexColorLoc, GL_TRUE); 
             glBindVertexArray(grassVAO);
             glDrawArrays(GL_QUADS, 0, 4); 
 
         }
         else {
-            // Draw fish
+            // Crtanje ribice
             glUniform1i(useTextureLoc, GL_FALSE);
             glUniform1i(useVertexColorLoc, GL_FALSE);
-            glUniform4f(colorLoc, 1.0f, 0.5f, 0.0f, 1.0f);  // Fish color (example: orange)
+            glUniform4f(colorLoc, 1.0f, 0.5f, 0.0f, 1.0f);  
             glBindVertexArray(fishVAO);
-            glDrawArrays(GL_TRIANGLES, 0, 3);  // Assuming 3 vertices for the fish
+            glDrawArrays(GL_TRIANGLES, 0, 3);  
         } 
 
-        // Draw index
+        // Crtanje teksture indexa
         glBindTexture(GL_TEXTURE_2D, indexTexture);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, indexTexture);
         glUniform1i(useTextureLoc, GL_TRUE);
-        glUniform1i(useVertexColorLoc, GL_TRUE); // Use vertex color
+        glUniform1i(useVertexColorLoc, GL_TRUE); 
         glBindVertexArray(indexVAO);
         glDrawArrays(GL_QUADS, 0, 4);
 
 
-
         glfwSwapBuffers(window);
         glfwPollEvents();
-
-    
     }
 
     glDeleteVertexArrays(1, &skyVAO);
@@ -650,7 +628,8 @@ int main(void)
     glDeleteVertexArrays(1, &moonVAO);
     glDeleteBuffers(1, &moonVBO);
 
-
+    glDeleteVertexArrays(1, &starVAO);
+    glDeleteBuffers(1, &starVBO);
 
     glDeleteProgram(unifiedShader);
 
@@ -732,7 +711,6 @@ unsigned int createShader(const char* vsSource, const char* fsSource)
 
     return program;
 }
-
 static unsigned loadImageToTexture(const char* filePath) {
     int TextureWidth;
     int TextureHeight;

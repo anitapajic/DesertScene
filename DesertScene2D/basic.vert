@@ -10,6 +10,9 @@ uniform vec2 uMoonPos;                     // Pozicija polumeseca
 uniform bool uIsSun;                       // Da li se crta Sunce
 uniform bool uUseSunMoonPositioning;       // Da li koristiti posebno pozicioniranje za Sunce i polumesec
 
+uniform bool uRenderStars;                // New uniform to check if we're rendering stars
+uniform float uStarSize; 
+
 void main() {
     vec2 position = aPos;
 
@@ -24,4 +27,8 @@ void main() {
     gl_Position = vec4(position, 0.0, 1.0); // Convert the vec2 position to a vec4 with z = 0 and w = 1
     vertexColor = aColor;                   // Pass the color to the fragment shader
     TexCoord = aTexCoord;                   // Pass the texture coordinates to the fragment shader
+
+    if (uRenderStars) {
+        gl_PointSize = uStarSize;         // Set the size of the points (stars)
+    }
 }

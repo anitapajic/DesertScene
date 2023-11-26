@@ -4,12 +4,12 @@ in vec3 vertexColor;
 out vec4 FragColor;
 
 uniform vec4 uColor;
-uniform vec4 uNightColor;
 uniform sampler2D uTexture;
 uniform bool useVertexColor;
 uniform bool useTexture; // Flag to determine whether to use texturing
 
-uniform bool isNight; 
+uniform bool uRenderStars;                // New uniform to check if we're rendering stars
+uniform float uStarIntensity; 
 
 void main() {
     if (useTexture) {
@@ -17,7 +17,9 @@ void main() {
         FragColor = texColor;
     } else if (useVertexColor) {
         FragColor = vec4(vertexColor, 1.0);
+    }else if (uRenderStars) {
+        FragColor = vec4(1.0, 1.0, 1.0, uStarIntensity); // White color with variable alpha for stars
     } else {
-        FragColor = isNight ? uNightColor : uColor; 
+        FragColor = uColor; 
     }
 }

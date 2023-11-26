@@ -1,2 +1,4 @@
 C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\Vezbe5\Teksture\x64\Debug\glew32.dll
 C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\Vezbe5\Teksture\x64\Debug\Sablon.exe
+C:\Users\anita\Desktop\RG-projekat\DesertScene2D\x64\Debug\glew32.dll
+C:\Users\anita\Desktop\RG-projekat\DesertScene2D\x64\Debug\Sablon.exe
