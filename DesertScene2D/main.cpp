@@ -143,10 +143,6 @@ void generateEllipseVertices(float* vertices, float centerX, float centerY, floa
         vertices[vertexIndex++] = centerY + radiusY * sin(angle); // Y
     }
 }
-// Funkcija za izracunavanje interpolacijskog faktora za promenu boja neba i zvezdica
-float getInterpolationFactor(float sunPosY, float moonPosY) {
-    return (sunPosY + 1.0f) / 2.0f; 
-}
 
 int main(void)
 {
@@ -187,10 +183,10 @@ int main(void)
     generateHalfCircleVertices(halfCircleVertices, 0.1f, 0.0f, 0.0f); // Za polumesec
 
     float skyVertices[] = {
-    -1.0f, 1.0f,  // Leva gornja
-     1.0f, 1.0f,  // Desna gornja
-     1.0f, 0.0f,  // Desna donja
-    -1.0f, 0.0f   // Leva donja
+     -1.0f, 1.0f,  // Top-left
+     -1.0f, -1.0f, // Bottom-left
+      1.0f, 1.0f,  // Top-right
+      1.0f, -1.0f  // Bottom-right
     };
   
     // Oaza (voda)
@@ -211,25 +207,23 @@ int main(void)
     };
 
     float grassVertices[] = {
-        // Koordinate    // Deo slike (s, t)
-        -0.8f, -0.7f, 0.0f, 0.0f, // Leva donja
-        -0.2f, -0.7f, 1.0f, 0.0f, // Desna donja
-        -0.2f, 0.06f,    1.0f, 1.0f, // Desna gornja
-        -0.8f, 0.06f,    0.0f, 1.0f  // Leva gornja
+    -0.8f, 0.06f, 0.0f, 1.0f, // Top-left (Leva gornja)
+    -0.8f, -0.7f, 0.0f, 0.0f, // Bottom-left (Leva donja)
+    -0.2f, 0.06f, 1.0f, 1.0f, // Top-right (Desna gornja)
+    -0.2f, -0.7f, 1.0f, 0.0f  // Bottom-right (Desna donja)
     };
 
     float indexVertices[] = {
-        // Koordinate    // Deo slike (s, t)
-        0.4f, -1.0f,   0.0f, 0.0f, // Leva donja
-        1.0f, -1.0f,    1.0f, 0.0f, // Desna donja
-        1.0f, -0.8f,    1.0f, 1.0f, // Desna gornja
-        0.4f, -0.8f,   0.0f, 1.0f  // Leva gornja
+    0.4f, -0.8f, 0.0f, 1.0f, // Top-left (Leva gornja)
+    0.4f, -1.0f, 0.0f, 0.0f, // Bottom-left (Leva donja)
+    1.0f, -0.8f, 1.0f, 1.0f, // Top-right (Desna gornja)
+    1.0f, -1.0f, 1.0f, 0.0f  // Bottom-right (Desna donja)
     };
     float desertVertices[] = {
-    -1.0f,  0.0f,  // Leva gornja
-     1.0f,  0.0f,  // Desna gornja
-     1.0f, -1.0f,  // Desna donja
-    -1.0f, -1.0f   // Leva donja
+    -1.0f,  0.0f,  // Top-left (Leva gornja)
+    -1.0f, -1.0f,  // Bottom-left (Leva donja)
+     1.0f,  0.0f,  // Top-right (Desna gornja)
+     1.0f, -1.0f   // Bottom-right (Desna donja)
     };
 
     // Zvezdice
@@ -299,6 +293,7 @@ int main(void)
 
 
     //Tekstura
+    // 
     // Aktiviranje prve teksture ( trava)
     glActiveTexture(GL_TEXTURE0);
     unsigned grassTexture = loadImageToTexture("res/grass2.png");
@@ -447,7 +442,7 @@ int main(void)
         GLuint uStarIntensityLoc = glGetUniformLocation(unifiedShader, "uStarIntensity");
 
         glUseProgram(unifiedShader);
-        
+                
         glUniform1i(uUseSunMoonPositioningLoc, GL_FALSE);
 
         if (!isDayPaused) {
@@ -482,7 +477,7 @@ int main(void)
         glUniform1i(useTextureLoc, GL_FALSE);
         glUniform1i(useVertexColorLoc, GL_FALSE);
         glBindVertexArray(skyVAO);
-        glDrawArrays(GL_QUADS, 0, 4);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
        
         float starIntensity = 1.0f - interpolationFactor; // Maksimalan kada je interpolationFactor 0 
 
@@ -520,7 +515,7 @@ int main(void)
         glUniform1i(useVertexColorLoc, GL_FALSE);
         glUniform4f(colorLoc, 0.76f, 0.70f, 0.50f, 1.0f);
         glBindVertexArray(desertVAO);
-        glDrawArrays(GL_QUADS, 0, 4);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
         // Crtanje vode
         glUniform1i(useTextureLoc, GL_FALSE);
@@ -569,7 +564,7 @@ int main(void)
             glUniform1i(useTextureLoc, GL_TRUE);
             glUniform1i(useVertexColorLoc, GL_TRUE); 
             glBindVertexArray(grassVAO);
-            glDrawArrays(GL_QUADS, 0, 4); 
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
         }
         else {
@@ -588,7 +583,7 @@ int main(void)
         glUniform1i(useTextureLoc, GL_TRUE);
         glUniform1i(useVertexColorLoc, GL_TRUE); 
         glBindVertexArray(indexVAO);
-        glDrawArrays(GL_QUADS, 0, 4);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 
         glfwSwapBuffers(window);
