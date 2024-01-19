@@ -1,0 +1,15 @@
+# Blender MTL File: 'pyramid.blend'
+# Material Count: 1
+
+newmtl Pyramid
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd sandstone_cracks_diff_1k.jpg
+map_Ks sandstone_cracks_spec_1k.jpg
+map_Ka sandstone_cracks_rough_1k.jpg

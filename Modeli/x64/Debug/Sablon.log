@@ -1,0 +1,14 @@
+﻿  main.cpp
+C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\V11\Modeli\main.cpp(138,21): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\V11\Modeli\main.cpp(207,17): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\V11\Modeli\main.cpp(212,23): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
+C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\V11\Modeli\main.cpp(212,18): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
+C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\V11\Modeli\main.cpp(509,17): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\V11\Modeli\main.cpp(511,28): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\V11\Modeli\main.cpp(512,28): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\V11\Modeli\main.cpp(549,41): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\V11\Modeli\main.cpp(578,39): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\V11\Modeli\main.cpp(579,37): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\V11\Modeli\main.cpp(584,34): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\V11\Modeli\main.cpp(588,45): warning C4305: 'argument': truncation from 'double' to 'float'
+  Sablon.vcxproj -> C:\Users\anita\OneDrive\Radna površina\FAKULTET\IV godina\I semestar\RG\Vezbe\V11\Modeli\x64\Debug\Sablon.exe
